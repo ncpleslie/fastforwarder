@@ -54,7 +54,7 @@ jobs:
       - name: Upload ${{ matrix.browser }} extension artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastforwarder-web-extension-${{ matrix.browser }}
+          name: fastforwarder-extension-${{ matrix.browser }}
           path: dist_${{ matrix.browser }}
 
   release:
