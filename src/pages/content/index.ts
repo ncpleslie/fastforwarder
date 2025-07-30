@@ -16,9 +16,13 @@ async function init() {
 
 async function startListening() {
   try {
-    runtime.onMessage.addListener((request: any) => {
+    runtime.onMessage.addListener((request: unknown) => {
+      if (typeof request !== "object" || request === null) {
+        return;
+      }
+
       if ("speed" in request) {
-        const message: Message = request;
+        const message = request as Message;
         updateAllVideoFrameSpeeds(message.speed);
       }
     });

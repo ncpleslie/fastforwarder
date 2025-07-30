@@ -74,8 +74,8 @@ export default function Popup() {
   }, []);
 
   return (
-    <main className="pt-4 pb-4 px-4 flex flex-col justify-center w-full h-full gap-4">
-      <label htmlFor="slider" className="text-white hidden">
+    <main className="flex h-full w-full flex-col justify-center gap-4 px-4 pt-4 pb-4">
+      <label htmlFor="slider" className="hidden text-white">
         Speed: <span>{value}</span>
       </label>
       <div className="flex items-center gap-4">

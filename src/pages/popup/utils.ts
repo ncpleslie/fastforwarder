@@ -20,7 +20,7 @@ export async function updateSpeed(num: number) {
       tabs.sendMessage(tab.id, {
         speed: num,
       } satisfies Message);
-    })
+    }),
   );
 
   storage.local.set({ [STORAGE_KEY]: num });

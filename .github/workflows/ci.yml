@@ -1,33 +1,95 @@
-name: Build and Zip Extension
+name: CI & Release
 
 on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+  pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: "web-extension"
+  cancel-in-progress: true
 
 jobs:
   build:
-    name: Build
-    timeout-minutes: 15
+    name: Lint, Test, Build (${{ matrix.browser }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        browser: [firefox, chrome]
     steps:
-      - name: Check out code
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
- 
-      - name: Setup Node.js environment
+
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'npm'
- 
-      - name: Install dependencies
-        run: npm ci
- 
-      - name: Build Firefox
-        run: npm build:firefox
+          cache: "npm"
 
-      - name: Upload Firefox extension artifacts
+      - name: Install dependencies
+        run: npm ci --force
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test:prod
+
+      - name: Build ${{ matrix.browser }}
+        run: npm run build:${{ matrix.browser }}
+
+      - name: Upload ${{ matrix.browser }} extension artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: vite-web-extension-firefox
-          path: dist_firfox
+          name: fastforwarder-web-extension-${{ matrix.browser }}
+          path: dist_${{ matrix.browser }}
+
+  release:
+    name: Release
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Firefox artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: fastforwarder-extension-firefox
+          path: dist_firefox
+
+      - name: Download Chrome artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: fastforwarder-extension-chrome
+          path: dist_chrome
+
+      - name: Zip Firefox extension
+        run: |
+          cd dist_firefox
+          zip -r ../fastforwarder-firefox-extension.zip .
+
+      - name: Zip Chrome extension
+        run: |
+          cd dist_chrome
+          zip -r ../fastforwarder-chrome-extension.zip .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            fastforwarder-firefox-extension.zip
+            fastforwarder-chrome-extension.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

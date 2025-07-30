@@ -1,42 +1,33 @@
 {
   "manifest_version": 3,
-  "name": "SpeedEx",
-  "description": "Minimal Video Speed Controller",
+  "name": "FastForwarder",
+  "description": "Speed up HTML5 video playback on all websites with simple and intuitive controls.",
   "options_ui": {
     "page": "src/pages/options/index.html"
   },
   "action": {
     "default_popup": "src/pages/popup/index.html",
     "default_icon": {
-      "32": "icon-32.png"
+      "32": "icon32.png"
     }
   },
   "icons": {
-    "128": "icon-128.png"
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
   },
-  "permissions": [
-    "activeTab", "storage"
-  ],
+  "permissions": ["activeTab", "storage"],
   "content_scripts": [
     {
-      "matches": [
-        "http://*/*",
-        "https://*/*",
-        "<all_urls>"
-      ],
-      "js": [
-        "src/pages/content/index.tsx"
-      ]
+      "matches": ["<all_urls>"],
+      "js": ["src/pages/content/index.ts"]
     }
   ],
   "devtools_page": "src/pages/devtools/index.html",
   "web_accessible_resources": [
     {
-      "resources": [
-        "contentStyle.css",
-        "icon-128.png",
-        "icon-32.png"
-      ],
+      "resources": ["icon128.png", "icon32.png"],
       "matches": []
     }
   ]
