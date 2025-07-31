@@ -1,90 +1,41 @@
-import { KeyboardEvent, useEffect, useRef, useState } from "react";
-import {
-  DEFAULT_SPEED,
-  MAX_SPEED,
-  MIN_SPEED,
-  SPEED_STEP,
-  STORAGE_KEY,
-  UPDATE_INTERVAL_MS,
-} from "./constants";
-import { updateSpeed } from "./utils";
 import { Slider } from "@src/components/Slider";
 import { Button } from "@src/components/Button";
-import { storage } from "webextension-polyfill";
+import { useSpeedControl } from "./useSpeedControl";
+import type { KeyboardEvent } from "react";
 
 export default function Popup() {
-  const [value, setValue] = useState(DEFAULT_SPEED);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const {
+    value,
+    handleSliderChange,
+    startDecreasing,
+    startIncreasing,
+    stopAdjusting,
+    min,
+    max,
+    step,
+  } = useSpeedControl();
 
-  const handleSliderChange = (value: number[]) => {
-    const num = value[0];
-    setValue(num);
-    updateSpeed(num);
-  };
-
-  const handleKeyDownDecrease = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      startDecreasing();
+  const handleButtonKey = (action: () => void) => (e: KeyboardEvent) => {
+    if ((e.key === " " || e.key === "Enter") && e.repeat === false) {
+      e.preventDefault();
+      action();
     }
   };
-
-  const handleKeyDownIncrease = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      startIncreasing();
-    }
-  };
-
-  const startDecreasing = () => {
-    setValue((v) => Math.max(v - SPEED_STEP, MIN_SPEED));
-    intervalRef.current = setInterval(() => {
-      setValue((v) => Math.max(v - SPEED_STEP, MIN_SPEED));
-    }, UPDATE_INTERVAL_MS);
-  };
-
-  const startIncreasing = () => {
-    setValue((v) => Math.min(v + SPEED_STEP, MAX_SPEED));
-    intervalRef.current = setInterval(() => {
-      setValue((v) => Math.min(v + SPEED_STEP, MAX_SPEED));
-    }, UPDATE_INTERVAL_MS);
-  };
-
-  const stopAdjustment = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    updateSpeed(value);
-  }, [value]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const storedSpeed = await storage.local.get();
-        const speed = storedSpeed[STORAGE_KEY];
-        if (speed && typeof speed === "number") {
-          setValue(speed);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, []);
 
   return (
     <main className="flex h-full w-full flex-col justify-center gap-4 px-4 pt-4 pb-4">
-      <label htmlFor="slider" className="hidden text-white">
+      <label htmlFor="slider" className="sr-only">
         Speed: <span>{value}</span>
       </label>
       <div className="flex items-center gap-4">
         <Button
-          aria-label="Decrease Speed"
+          aria-label="Decrease speed"
+          tabIndex={0}
           onMouseDown={startDecreasing}
-          onMouseUp={stopAdjustment}
-          onKeyDown={handleKeyDownDecrease}
-          onKeyUp={stopAdjustment}
+          onMouseUp={stopAdjusting}
+          onMouseLeave={stopAdjusting}
+          onKeyDown={handleButtonKey(startDecreasing)}
+          onKeyUp={stopAdjusting}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -93,6 +44,8 @@ export default function Popup() {
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
+            aria-hidden="true"
+            focusable="false"
           >
             <line
               x1="5"
@@ -107,20 +60,22 @@ export default function Popup() {
         </Button>
         <Slider
           id="slider"
-          min={MIN_SPEED}
-          max={MAX_SPEED}
-          defaultValue={[DEFAULT_SPEED]}
-          step={SPEED_STEP}
+          min={min}
+          max={max}
+          defaultValue={[value]}
+          step={step}
           value={[value]}
           onValueChange={handleSliderChange}
-          aria-label="Select a number from 0 to 10"
+          aria-label="Playback speed"
         />
         <Button
           aria-label="Increase speed"
+          tabIndex={0}
           onMouseDown={startIncreasing}
-          onMouseUp={stopAdjustment}
-          onKeyDown={handleKeyDownIncrease}
-          onKeyUp={stopAdjustment}
+          onMouseUp={stopAdjusting}
+          onMouseLeave={stopAdjusting}
+          onKeyDown={handleButtonKey(startIncreasing)}
+          onKeyUp={stopAdjusting}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -129,6 +84,8 @@ export default function Popup() {
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
+            aria-hidden="true"
+            focusable="false"
           >
             <line
               x1="12"

@@ -68,7 +68,7 @@ describe("Popup", () => {
       [constants.STORAGE_KEY]: expectedSpeed,
     });
     render(<Popup />);
-    // Wait for useEffect
+
     await act(async () => {
       await Promise.resolve();
     });
