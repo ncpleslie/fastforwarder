@@ -1,12 +1,8 @@
 <div align="center">
-<img src="public/icon128.png" alt="logo"/>
+<img src="public/icon128.png" alt="FastForwarder logo"/>
 <h1>FastForwarder</h1>
 
-<h5>
-FastForwarder
-</h5>
-
-<h5><b>FastForwarder</b> is a lightweight browser extension for Chrome and Firefox that lets you speed up HTML5 video playback on any website. Whether you're binge-watching, studying, or just trying to save time, FastForwarder gives you instant control over video speed.</h5>
+<h5>FastForwarder is a lightweight browser extension for Chrome and Firefox that lets you speed up HTML5 video playback on any website. Whether you're binge-watching, studying, or just trying to save time, FastForwarder gives you instant control over video speed.</h5>
 
 </div>
 
