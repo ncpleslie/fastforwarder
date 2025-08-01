@@ -31,5 +31,10 @@
       "resources": ["icon128.png", "icon32.png"],
       "matches": []
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "fastforwarder@nickleslie.dev"
+    }
+  }
 }
