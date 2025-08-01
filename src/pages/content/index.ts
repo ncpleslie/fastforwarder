@@ -1,6 +1,7 @@
 import { Message } from "@src/types/message";
 import { runtime, storage } from "webextension-polyfill";
 import { STORAGE_KEY } from "../popup/constants";
+import { logger } from "@src/utils/logger";
 
 async function init() {
   try {
@@ -9,8 +10,8 @@ async function init() {
     if (speed && typeof speed === "number") {
       updateAllVideoFrameSpeeds(speed);
     }
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    logger.error("Error initializing content script:", error);
   }
 }
 
@@ -26,8 +27,8 @@ async function startListening() {
         updateAllVideoFrameSpeeds(message.speed);
       }
     });
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    logger.error("Error starting message listener:", error);
   }
 }
 

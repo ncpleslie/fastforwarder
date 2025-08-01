@@ -2,8 +2,10 @@ import { Slider } from "@src/components/Slider";
 import { Button } from "@src/components/Button";
 import { useSpeedControl } from "./useSpeedControl";
 import type { KeyboardEvent } from "react";
+import { useTabControlsAvailable } from "./useTabControlsAvailable";
 
 export default function Popup() {
+  const canUseControls = useTabControlsAvailable();
   const {
     value,
     handleSliderChange,
@@ -21,6 +23,15 @@ export default function Popup() {
       action();
     }
   };
+
+  if (!canUseControls) {
+    return (
+      <main className="flex h-full w-full flex-col items-center justify-center p-4 pt-3 text-center text-sm text-gray-100">
+        <p>Controls are not available on this page.</p>
+        <p>Switch tabs and try again.</p>
+      </main>
+    );
+  }
 
   return (
     <main className="flex h-full w-full flex-col justify-center gap-4 px-4 pt-4 pb-4">

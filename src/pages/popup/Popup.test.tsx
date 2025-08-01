@@ -10,21 +10,33 @@ import Popup from "./Popup";
 import * as utils from "./utils";
 import * as constants from "./constants";
 import { storage } from "webextension-polyfill";
+import { useTabControlsAvailable } from "./useTabControlsAvailable";
 
 vi.mock("webextension-polyfill", () => ({
   storage: {
     local: {
       get: vi.fn(),
+      set: vi.fn(),
     },
   },
+  tabs: {
+    sendMessage: vi.fn(),
+    query: vi.fn(() => Promise.resolve([])),
+  },
+}));
+
+vi.mock("./useTabControlsAvailable", () => ({
+  useTabControlsAvailable: vi.fn(),
 }));
 
 const mockStorageGet = vi.mocked(storage.local.get);
 const updateSpeedSpy = vi.spyOn(utils, "updateSpeed");
+const mockUseTabControlsAvailable = vi.mocked(useTabControlsAvailable);
 
 describe("Popup", () => {
   beforeEach(() => {
     mockStorageGet.mockResolvedValue({});
+    mockUseTabControlsAvailable.mockReturnValue(true);
     vi.useFakeTimers();
   });
 
@@ -126,5 +138,17 @@ describe("Popup", () => {
     expect(Number(screen.getByRole("slider").ariaValueNow)).toBe(
       valueAfterStop,
     );
+  });
+
+  it("disables controls when tab controls are not available", () => {
+    mockUseTabControlsAvailable.mockReturnValue(false);
+    render(<Popup />);
+    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /decrease speed/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /increase speed/i }),
+    ).not.toBeInTheDocument();
   });
 });

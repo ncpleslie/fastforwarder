@@ -4,11 +4,9 @@ import {
   MAX_SPEED,
   MIN_SPEED,
   SPEED_STEP,
-  STORAGE_KEY,
   UPDATE_INTERVAL_MS,
 } from "./constants";
-import { updateSpeed } from "./utils";
-import { storage } from "webextension-polyfill";
+import { getSpeedFromStorage, updateSpeed } from "./utils";
 
 /**
  * Manage playback speed value and adjustment logic for the popup UI.
@@ -25,17 +23,9 @@ export function useSpeedControl() {
 
   // Load initial value from storage on mount
   useEffect(() => {
-    (async () => {
-      try {
-        const storedSpeed = await storage.local.get();
-        const speed = storedSpeed[STORAGE_KEY];
-        if (typeof speed === "number") {
-          setValue(speed);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    })();
+    getSpeedFromStorage().then((storedSpeed) => {
+      setValue(storedSpeed);
+    });
   }, []);
 
   // Clean up interval on unmount
@@ -63,7 +53,10 @@ export function useSpeedControl() {
   const adjustSpeed = useCallback((delta: number) => {
     setValue((v) => {
       const next = v + delta;
-      if (delta > 0) return Math.min(next, MAX_SPEED);
+      if (delta > 0) {
+        return Math.min(next, MAX_SPEED);
+      }
+
       return Math.max(next, MIN_SPEED);
     });
   }, []);
@@ -75,7 +68,10 @@ export function useSpeedControl() {
    */
   const startAdjusting = useCallback(
     (delta: number) => {
-      if (intervalRef.current) return; // Prevent multiple intervals
+      if (intervalRef.current) {
+        return;
+      }
+
       adjustSpeed(delta);
       intervalRef.current = setInterval(
         () => adjustSpeed(delta),
