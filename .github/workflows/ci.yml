@@ -63,6 +63,13 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
+      - name: Set version from tag
+        id: set_version
+        run: |
+          TAG_VERSION="${GITHUB_REF##*/}"
+          VERSION="${TAG_VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Download Firefox artifact
         uses: actions/download-artifact@v4
         with:
@@ -74,6 +81,16 @@ jobs:
         with:
           name: fastforwarder-extension-chrome
           path: dist_chrome
+
+      - name: Update manifest.json version (firefox)
+        run: |
+          VERSION="${{ steps.set_version.outputs.version }}"
+          jq --arg v "$VERSION" '.version = $v' dist_firefox/manifest.json > dist_firefox/manifest.tmp.json && mv dist_firefox/manifest.tmp.json dist_firefox/manifest.json
+
+      - name: Update manifest.json version (chrome)
+        run: |
+          VERSION="${{ steps.set_version.outputs.version }}"
+          jq --arg v "$VERSION" '.version = $v' dist_chrome/manifest.json > dist_chrome/manifest.tmp.json && mv dist_chrome/manifest.tmp.json dist_chrome/manifest.json
 
       - name: Zip Firefox extension
         run: |

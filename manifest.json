@@ -1,5 +1,6 @@
 {
   "manifest_version": 3,
+  "version": "1.0.0",
   "name": "FastForwarder",
   "description": "Speed up HTML5 video playback on all websites with simple and intuitive controls.",
   "options_ui": {
